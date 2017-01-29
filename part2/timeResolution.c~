@@ -36,7 +36,7 @@ int main (int argc, char **argv)
 	double minrdtscDiffTime = 100;
 	int j;
 
-	for(j = 0; j < 100000000; j++)
+	for(j = 0; j < BILLION; j++)
 	{
 		clock_gettime(CLOCK_MONOTONIC, &start);
 		for(i = 0; i < iterations; i++)
