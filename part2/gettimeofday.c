@@ -1,12 +1,19 @@
+#include <time.h>
 #include <sys/time.h>
-#include "stdlib.h"
+#include <stdlib.h>
+#include <stdio.h>
 
 int main() {
-//	char buffer[30];
-	struct timeval tv;
+	struct timeval start, end;	
 	
-	time_t curtime;
-	gettimeofday(&tv, NULL); 
-	curtime=tv.tv_sec;
-	printf(curtime);
+	gettimeofday(&start, NULL);	
+	
+	sleep(10);
+	
+	gettimeofday(&end, NULL);
+
+	printf("%ld\n", ((end.tv_sec * 1000000 + end.tv_usec) 
+			- (start.tv_sec * 1000000 + start.tv_usec)));
+
+	return 0;
 }
