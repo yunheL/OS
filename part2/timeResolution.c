@@ -35,6 +35,8 @@ int main (int argc, char **argv)
 	double rdtscDiff, rdtscTicks, rdtscFreq_us, rdtscDiffTime;
 	double minrdtscDiffTime = 100;
 	int j;
+	double minTicks = 100;
+	double maxTicks = 0;
 
 	for(j = 0; j < 100000000; j++)
 	{
@@ -62,9 +64,15 @@ int main (int argc, char **argv)
 		sleep(1);
 		endRD = rdtsc();
 		rdtscTicks = endRD - startRD;*/
-	
+		if(rdtscDiff < minTicks)
+		{
+			minTicks = rdtscDiff;
+		}
+		if(rdtscDiff > maxTicks)
+		{
+			maxTicks = rdtscDiff;
+		}
 		rdtscFreq_us = 0.000313;
-	
 		rdtscDiffTime = rdtscDiff * rdtscFreq_us;
 		if(rdtscDiffTime < minrdtscDiffTime)
 		{
@@ -76,7 +84,8 @@ int main (int argc, char **argv)
 	}
 	printf("min gettime (us): %lf\n",(minDiff/1000));
 	printf("min rdtsc (us): %lf\n", minrdtscDiffTime);
-
+	printf("min rdtsc (ticks): %lf\n", minTicks);
+	printf("max rdtsc (ticks): %lf\n", maxTicks);
 	return 0;	
 	
 }
