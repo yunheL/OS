@@ -27,6 +27,21 @@ avg: 21.499767 ticks
 ===clock_gettime() spec===
 run clock_gettime() for 1 billions, divide the time elapsed by 1 billion. Do this in loop for 50 times, record max, min and average.
 
+1st run
+max: 15.784463 ns
+min: 15.369225 ns
+avg: 15.470197 ns
+
+2nd run
+max: 16.028545 ns
+min: 15.367361 ns
+avg: 15.441755 ns
+
+3rd run
+max: 15.714920 ns
+min: 15.371749 ns
+avg: 15.423429 ns
+
 ===point to make sure===
 1. 3 type of average. arthimatic, harmonic and geometric.
 2. "If the processor can automatically vary the clock speed, the timestamp counter may not reflect real time." Make sure processor don't vary clock speed.
