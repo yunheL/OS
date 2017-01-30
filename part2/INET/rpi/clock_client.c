@@ -10,6 +10,11 @@
 #include <unistd.h>
 #include <netinet/tcp.h>
 #include "rdtsc.h"
+#include <stdint.h>
+#include <stdlib.h>
+#include <time.h>
+#include <inttypes.h>
+#define BILLION 1000000000L
 #define NUMLOOPS 100000
 //#define NUMRUNS 3
 
@@ -32,9 +37,11 @@ int main(int argc, char *argv[])
 	struct sockaddr_in serv_addr;
 	struct hostent *server;
 
-	long long int a, b;
-	long long int max, min, diff;
-	long long int sum = 0;
+	uint64_t diff;
+	struct timespec start,end;
+	
+	uint64_t max, min;
+	uint64_t sum = 0;
 	double avg;
 
 	char buffer[256];
@@ -87,12 +94,12 @@ int main(int argc, char *argv[])
 
 		bzero(buffer1,256);
 		//start timing
-		a = rdtsc();
+		clock_gettime(CLOCK_MONOTONIC, &start);
 //		n0 = write(sockfd,buffer,strlen(buffer));
 		n0 = write(sockfd,payload,payload_len);
 		n1 = read(sockfd,buffer1,255);
-		b = rdtsc();
-		diff = b-a;
+		clock_gettime(CLOCK_MONOTONIC, &end);
+		diff = BILLION * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
 		//end timing
 
 		if (n0 < 0) 
@@ -121,9 +128,9 @@ int main(int argc, char *argv[])
 		error("close failed\n");
 
 	avg = ((double)sum)/NUMLOOPS;
-	printf("max: %llu ticks\n", max);
-	printf("min: %llu ticks\n", min);
-	printf("avg: %lf ticks\n", avg);
+	printf("max: %" PRIu64 " ns\n", max);
+	printf("min: %" PRIu64 " ns\n", min);
+	printf("avg: %lf ns\n", avg);
 //	}
 	return 0;
 }

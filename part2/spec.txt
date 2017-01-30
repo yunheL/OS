@@ -42,6 +42,140 @@ max: 15.714920 ns
 min: 15.371749 ns
 avg: 15.423429 ns
 
+===socket===
+1. set flags TCP_NODELAY, SO_REUSEADDR
+2. remove other operating between read and write so that we are not timing anything else than latency, especially the print statement, saved lots of time
+3. generate payload to fulfill the length requirement
+4. pined process to a specific CPU in order to use rdtsc();
+4. record max, min and avg. It looks like using min would make the most sense.
+5. results of latency. Running each msg size of 100,000 times
+6. created clock_client to record time use clock_gettime() and record time in ns. Looks like the result from clock_gettime() matches the result from rdtsc().
+
+size = 4
+1st run
+max: 12285584 ticks
+min: 199788 ticks
+avg: 316489.329940 ticks
+
+2nd run
+max: 29009744 ticks
+min: 198000 ticks
+avg: 274438.620370 ticks
+
+3rd run
+max: 58008666 ticks
+min: 196952 ticks
+avg: 295951.005660 ticks
+
+4th run
+max: 9139291 ns
+min: 61390 ns
+avg: 98581.130660 ns
+
+5th run
+max: 6000315 ns
+min: 61601 ns
+avg: 92163.854510 ns
+
+6th run
+max: 4128016 ns
+min: 60172 ns
+avg: 94187.986970 ns
+
+size = 16
+1st run
+max: 20477296 ticks
+min: 202684 ticks
+avg: 306887.813420 ticks
+
+2nd run
+max: 32054620 ticks
+min: 199920 ticks
+avg: 302505.346310 ticks
+
+3rd run
+max: 21217152 ticks
+min: 201736 ticks
+avg: 289345.036210 ticks
+
+4th run
+max: 11733415 ns
+min: 63769 ns
+avg: 98092.871550 ns
+
+5th run
+max: 8474847 ns
+min: 62669 ns
+avg: 92791.558650 ns
+
+6th run
+max: 9417547 ns
+min: 64689 ns
+avg: 100018.381050 ns
+
+size = 64
+1st run 
+max: 270694088 ticks
+min: 236156 ticks
+avg: 604935.661060 ticks
+
+2nd run
+max: 27844677 ticks
+min: 260604 ticks
+avg: 588142.541390 ticks
+
+3rd run
+max: 23007664 ticks
+min: 285472 ticks
+avg: 594994.047870 ticks
+
+4th run
+max: 14075076 ns
+min: 89617 ns
+avg: 183497.997150 ns
+
+5th run
+max: 9571040 ns
+min: 90349 ns
+avg: 185865.520620 ns
+
+6th run
+max: 8988571 ns
+min: 92201 ns
+avg: 190648.571650 ns
+
+size = 256
+1st run
+max: 30032932 ticks
+min: 304240 ticks
+avg: 643998.162460 ticks
+
+2nd run
+max: 38633168 ticks
+min: 353208 ticks
+avg: 686288.537820 ticks
+
+3rd run
+max: 23428128 ticks
+min: 341408 ticks
+avg: 648245.159200 ticks
+
+4th run
+max: 7023738 ns
+min: 92701 ns
+avg: 207101.698860 ns
+
+5th run
+max: 8078583 ns
+min: 100816 ns
+avg: 207747.516520 ns
+
+6th run
+max: 9539733 ns
+min: 99610 ns
+avg: 205530.689920 ns
+
+
 ===point to make sure===
 1. 3 type of average. arthimatic, harmonic and geometric.
 2. "If the processor can automatically vary the clock speed, the timestamp counter may not reflect real time." Make sure processor don't vary clock speed.
@@ -49,3 +183,9 @@ avg: 15.423429 ns
 4. 2 mechanism, highest resolution.
 5. simple loop experiment.
 6. confirm redtsc() accuracy with clock_gettime().
+
+===Sunday left off===
+1. finished 4-256 latency timing for socket
+2. To do for socket, throughput and latency with msg size > 256
+3. Working on the "where did the time go part"
+4. Starting writing paper
