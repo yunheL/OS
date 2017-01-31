@@ -8,7 +8,7 @@
 #include <netinet/in.h>
 #include <unistd.h>
 #include <netinet/tcp.h>
-#define NUMLOOPS 100000
+#define NUMLOOPS 3
 //#define NUMRUNS 3
 
 void error(char *msg)
@@ -25,7 +25,8 @@ int main(int argc, char *argv[])
 	int tr = 1;
 	char buffer[buf_size];
 	struct sockaddr_in serv_addr, cli_addr;
-	int n0, n1;
+	int n0 = 0;
+	int n1 = 0;
 	if (argc < 3) {
 		fprintf(stderr,"ERROR, no port and payload LEN provided\n");
 		exit(1);
@@ -54,18 +55,30 @@ int main(int argc, char *argv[])
 //	int k,i;
 //	for(k=0; k<NUMRUNS; k++)
 //	{
-	int i;
+	int i,k;
+	int read_num = 0;
+	k = 0; // use k to keep track of bytes written and have read
+
 	for(i=0; i<NUMLOOPS; i++)
 	{
 		bzero(buffer,buf_size+1);
-		n0 = read(newsockfd,buffer,buf_size);
-		//printf("Here is %d th message: %s\n",i+1,buffer);
-		n1 = write(newsockfd,"I got your message",18);
-		if (n0 < 0) error("ERROR reading from socket");
-		if (n1 < 0) error("ERROR writing to socket");
+		read_num = 0;
+		for(k=0; k<buf_size; k=k+n0)
+		{
+			n0 = read(newsockfd,buffer+k,buf_size-k);
+			if (n0 < 0) error("ERROR reading from socket");
+			printf("have read: %d bytes\n", n0);
+			read_num = read_num + n0;
+		}
+		for(k=0; k<buf_size; k=k+n1)
+		{
+			n1 = write(newsockfd,buffer+k,buf_size-k);
+			if (n1 < 0) error("ERROR writing to socket");
+			printf("have written: %d bytes\n", n1);	
+		}
 	}
 //	}
-
+	printf("read_num: %d\n", read_num);
 	if(-1 == close(sockfd))
 		error("close0 failed");
 	if(-1 == close(newsockfd))

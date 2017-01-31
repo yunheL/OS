@@ -50,6 +50,11 @@ avg: 15.423429 ns
 4. record max, min and avg. It looks like using min would make the most sense.
 5. results of latency. Running each msg size of 100,000 times
 6. created clock_client to record time use clock_gettime() and record time in ns. Looks like the result from clock_gettime() matches the result from rdtsc().
+7.realized that the size of msg() that read and write might not be the size as you specified as the size goes up.
+8. you also want to make sure the server is sending back the same msg so that round trip time make sense. 
+9. Also you want the server to send back msg with the same size so that the round trip time actually make sense. 
+10. "Transmission times can be affecting in TCP by the MTU (maximum transmission unit) size (typically 1500 bytes) and read and write buffer sizes (typically 128KB. If you have root access to a Linux system, you can experiment with increasing these sizes. Of course, you will not be allowed to do that on the instructional Linux systems. "
+11. put the write and read in a loop to ensure the length of msg is desired.
 
 size = 4
 1st run
