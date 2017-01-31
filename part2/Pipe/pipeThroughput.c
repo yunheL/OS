@@ -16,6 +16,7 @@
 
 #define FREQ 0.000313
 #define ITERATIONS 100000
+#define 
 
 void makeMessage(char **mess, int size);
 unsigned long long createPipe(int size, char *message);
