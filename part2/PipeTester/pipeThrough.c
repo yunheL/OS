@@ -20,8 +20,8 @@
 #include "rdtsc.h"
 
 #define FREQ 0.000313
-#define ITERATIONS 10
-#define THROUGH_ITER 10
+#define ITERATIONS 1000
+#define THROUGH_ITER 128
 
 void makeMessage(char **mess, int size);
 unsigned long long createPipe(int size, char *message);
@@ -47,8 +47,12 @@ int main(int argc, char *argv[])
 	makeMessage(&message,size);
 	for(i = 0; i < ITERATIONS; i++){
 		diff = createPipe(size, message);
-		if(diff < diffMin){
+		if(i == 0){
 			diffMin = diff;
+		}else if(diff < diffMin){
+			diffMin = diff;
+		}else{
+			diffMin = diffMin;
 		}	
 	}
 	diffTime = diffMin*FREQ;
@@ -106,9 +110,10 @@ unsigned long long createPipe(int size, char *message)
 		for(j = 0; j < THROUGH_ITER; j++){
 			write(pfd[1], message, size);
 		}
+		end = rdtsc();
 		close(pfd[1]);
 		wait(NULL);	//wait for child to finish
-		end = rdtsc();
+		//end = rdtsc();
 
 		diffTicks = end - start;
 		//close(fd);

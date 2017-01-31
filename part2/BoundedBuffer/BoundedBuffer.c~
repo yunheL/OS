@@ -20,7 +20,7 @@
 #include <sys/mman.h>
 #include "rdtsc.h"
 #define FREQ 0.000313
-#define ITERATIONS 250000
+#define ITERATIONS 100000
 pthread_mutex_t lock;
 pthread_t tid[2];
 
@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
 {
 	assert(argc == 2);
 	int size;
-	int i;
+	int i,j;
 	int index = atoi(argv[1]);
 	int sizeArray[10] = {4,16,64,256,1024,4096,16384,65536,262144,524288};
 	char *message;
@@ -57,29 +57,38 @@ int main(int argc, char *argv[])
 	if(message == NULL) {perror("memory"); exit(EXIT_FAILURE); }
 	makeMessage(&message,size);
 	buff = mmap(NULL,size,PROT_READ |PROT_WRITE,MAP_SHARED,fd,0);
+	if(buff == MAP_FAILED) {perror("mmap"); exit(EXIT_FAILURE);}
 	if(pthread_mutex_init(&lock, NULL) != 0) {perror("mutex creation"); exit(EXIT_FAILURE);}
 	for(i=0;i<ITERATIONS;i++){
 		cpid = fork();
 		if(cpid == 1) {perror("fork"); exit(EXIT_FAILURE); }
 	
 		if(cpid == 0) { //child
-			while(read(fd,&buf, 1) > 0){}
 			pthread_mutex_lock(&lock);
+			j =0;
+			while(j < size){
+				read(fd,&buf,1);
+				j++;
+			}
+			//while(read(fd,&buf, 1) > 0){}
+			pthread_mutex_unlock(&lock);
 			exit(EXIT_SUCCESS);
 		}
 		else { //parent
 			start = rdtsc();
+			pthread_mutex_lock(&lock);
 			write(fd,message,size);
 			pthread_mutex_unlock(&lock);
 			wait(NULL);
 			end = rdtsc();
+
 			diffTicks = end - start;
 		}
 		if(diffTicks < diffMin){
 			diffMin = diffTicks;
 		}
 	}
-	
+	close(fd);
 	diffTime = diffMin*FREQ;
 	printf("Ticks: %llu\n", diffMin);
 	printf("Time(us): %lf\n",diffTime);

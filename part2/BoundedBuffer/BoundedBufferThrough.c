@@ -20,9 +20,10 @@
 #include <sys/mman.h>
 #include "rdtsc.h"
 #define FREQ 0.000313
-#define ITERATIONS 1
-#define T_I 1
-pthread_mutex_t lock;
+#define ITERATIONS 10
+#define T_I 10
+pthread_mutex_t lockWrite;
+pthread_mutex_t lockRead
 pthread_t tid[2];
 
 void makeMessage(char **mess, int size) {
@@ -38,7 +39,7 @@ int main(int argc, char *argv[])
 {
 	assert(argc == 2);
 	int size;
-	int i;
+	int i,j,k,m;
 	int index = atoi(argv[1]);
 	int sizeArray[10] = {4,16,64,256,1024,4096,16384,65536,262144,524288};
 	char *message;
@@ -51,7 +52,7 @@ int main(int argc, char *argv[])
 	unsigned long long diffMin = 1000000000000;
 	double diffTime;
 	double through, data;
-	int j, k;
+	
 	fd = open("membufferfile",O_RDWR);
 	size = sizeArray[index]; 
 	printf("Size: %d\n",size);
@@ -59,43 +60,54 @@ int main(int argc, char *argv[])
 	if(message == NULL) {perror("memory"); exit(EXIT_FAILURE); }
 	makeMessage(&message,size);
 	buff = mmap(NULL,size,PROT_READ |PROT_WRITE,MAP_SHARED,fd,0);
-	if(pthread_mutex_init(&lock, NULL) != 0) {perror("mutex creation"); exit(EXIT_FAILURE);}
+	if(buff == MAP_FAILED) {perror("mmap"); exit(EXIT_FAILURE);}
+	if(pthread_mutex_init(&lockWrite, NULL) != 0) {perror("mutex Write creation"); exit(EXIT_FAILURE);}
+	if(pthread_mutex_init(&lockRead, NULL) != 0 ) {perror("mutex Read creation"); exit(EXIT_FAILURE);}
 	for(i=0;i<ITERATIONS;i++){
 		cpid = fork();
 		if(cpid == 1) {perror("fork"); exit(EXIT_FAILURE); }
 	
 		if(cpid == 0) { //child
-			for(k=0;k<T_I;k++) {
-				pthread_mutex_lock(&lock);
-				while(read(fd,&buf, 1) > 0){}
-				pthread_mutex_unlock(&lock);
+			
+			
+			while(m < T_I){
+				pthread_mutex_lock(&lockRead);
+				j =0;
+				while(j < size){
+					read(fd,&buf,1);
+					j++;
+				}
+				pthread_mutex_unlock(&lockWrite);
+				m++;
 			}
 			exit(EXIT_SUCCESS);
 		}
 		else { //parent
-			for(j=0;j<T_I;j++){
-				start = rdtsc();
-				pthread_mutex_lock(&lock);
+			start = rdtsc();
+			k = 0;
+			while(k < T_I){
+				pthread_mutex_lock(&lockWrite);
 				write(fd,message,size);
-				pthread_mutex_unlock(&lock);
-				
+				pthread_mutex_unlock(&lockRead);
+				k++;
 			}
-			wait(NULL);
+			
 			end = rdtsc();
+			wait(NULL);
 			diffTicks = end - start;
 		}
 		if(diffTicks < diffMin){
 			diffMin = diffTicks;
 		}
 	}
-	
+	close(fd);
 	diffTime = diffMin*FREQ;
 	printf("Ticks: %llu\n", diffMin);
 	printf("Time(us): %lf\n",diffTime);
 	data = size*T_I;
 	through = data/diffTime;
 	printf("Throughput(B/us): %lf\n",through);
-	free(message);
+
 
 	return 0;
 	
