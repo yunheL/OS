@@ -63,6 +63,9 @@ avg: 15.423429 ns
 15. way to determin the number of iternations is to see whether the result from each time is fairly stable, and also, changing into a larger number won't really gave us a short min time.
 16. an obervation is that the avg value gets pretty stable with NUMLOOPs hit 10^4 but the min would get stable until 10^7
 
+experiments with size 4, 16, 64, 256, 1K, 4K, 16K, 64K, 256K, and 512K bytes. 
+
+Keep in mind that these are ROUNDTRIP TIMES
 size = 4
 run 10000000 cycles, length is 4, first 4 char: abcd
 max: 38868544 ticks, 12165.854272 us
@@ -75,24 +78,135 @@ max: 37279366 ticks, 11668.441558 us
 min: 25616 ticks, 8.017808 us
 avg: 51260.274445 ticks, 16.044466 us
 
+size = 64
 run 10000000 cycles, length is 64, first 4 char: abcd
 max: 40900030 ticks, 12801.709390 us
 min: 25291 ticks, 7.916083 us
 avg: 51432.047803 ticks, 16.098231 us
 
+size = 256
 run 10000000 cycles, length is 256, first 4 char: abcd
 max: 43181143 ticks, 13515.697759 us
 min: 25975 ticks, 8.130175 us
 avg: 51253.569981 ticks, 16.042367 us
 
+size = 1k
 run 10000000 cycles, length is 1024, first 4 char: abcd
 max: 43298263 ticks, 13552.356319 us
 min: 25451 ticks, 7.966163 us
 avg: 52762.593741 ticks, 16.514692 us
 
+size = 4k
+max: 37145438 ticks, 11626.522094 us
+min: 28508 ticks, 8.923004 us
+avg: 58450.093073 ticks, 18.294879 us
+
+size = 16k
+run 10000000 cycles, length is 16384, first 4 char: abcd
+max: 35301770 ticks, 11049.454010 us
+min: 38312 ticks, 11.991656 us
+avg: 72392.947601 ticks, 22.658993 us
+
+size = 64k
+run 10000000 cycles, length is 65536, first 4 char: abcd
+max: 48460038 ticks, 15167.991894 us
+min: 90577 ticks, 28.350601 us
+avg: 154370.634373 ticks, 48.318009 us
+
+size = 256k
+run 10000000 cycles, length is 262144, first 4 char: abcd
+max: 17114076 ticks, 5356.705788 us
+min: 216137 ticks, 67.650881 us
+avg: 302974.697638 ticks, 94.831080 us
+
+size = 512k
+run 10000000 cycles, length is 524288, first 4 char: abcd
+max: 49572079 ticks, 15516.060727 us
+min: 375526 ticks, 117.539638 us
+avg: 488248.376066 ticks, 152.821742 us
+
 ---throughput---
 1. use a counter to keep track of the number of bytes being sent
+2. changed the timing setting to only measure sending
+3. keep in mind that even through we are measuring round trip time in the latency part, the throughput part is not round trip time but one-way time.
 
+experiments with size 4, 16, 64, 256, 1K, 4K, 16K, 64K, 256K, and 512K bytes.
+
+size = 4
+run 10000000 cycles, length is 4, first 4 char: abcd
+max: 6606887 ticks, 2067.955631 us
+min: 7348 ticks, 2.299924 us
+avg: 16930.552070 ticks, 5.299263 us
+throughput: 1.739188 (B/us)
+
+size = 16
+run 10000000 cycles, length is 16, first 4 char: abcd
+max: 3521363 ticks, 1102.186619 us
+min: 6945 ticks, 2.173785 us
+avg: 16991.018538 ticks, 5.318189 us
+throughput: 7.360434 (B/us)
+
+size = 64
+run 10000000 cycles, length is 64, first 4 char: abcd
+max: 441114 ticks, 138.068682 us
+min: 7894 ticks, 2.470822 us
+avg: 17311.184361 ticks, 5.418401 us
+throughput: 25.902311 (B/us)
+
+size = 256
+run 10000000 cycles, length is 256, first 4 char: abcd
+max: 2996224 ticks, 937.818112 us
+min: 7492 ticks, 2.344996 us
+avg: 17470.532404 ticks, 5.468277 us
+throughput: 109.168630 (B/us)
+
+size = 1k
+run 10000000 cycles, length is 1024, first 4 char: abcd
+max: 166706 ticks, 52.178978 us
+min: 8232 ticks, 2.576616 us
+avg: 17805.944392 ticks, 5.573261 us
+throughput: 397.420493 (B/us)
+
+run 10000000 cycles, length is 1024, first 4 char: abcd
+max: 4815590 ticks, 1507.279670 us
+min: 7676 ticks, 2.402588 us
+avg: 17975.216830 ticks, 5.626243 us
+throughput: 426.207073 (B/us)
+
+size = 4k
+run 10000000 cycles, length is 4096, first 4 char: abcd
+max: 14025543 ticks, 4389.994959 us
+min: 8299 ticks, 2.597587 us
+avg: 19011.259810 ticks, 5.950524 us
+throughput: 1576.848052 (B/us)
+
+size = 16k
+run 10000000 cycles, length is 16384, first 4 char: abcd
+max: 13974214 ticks, 4373.928982 us
+min: 10812 ticks, 3.384156 us
+avg: 23148.418523 ticks, 7.245455 us
+throughput: 4841.384381 (B/us)
+
+size = 64k
+run 10000000 cycles, length is 65536, first 4 char: abcd
+max: 5089140 ticks, 1592.900820 us
+min: 25975 ticks, 8.130175 us
+avg: 49012.846509 ticks, 15.341021 us
+throughput: 8060.835099 (B/us)
+
+size = 256k
+run 10000000 cycles, length is 262144, first 4 char: abcd
+max: 659168 ticks, 206.319584 us
+min: 88280 ticks, 27.631640 us
+avg: 125257.636897 ticks, 39.205640 us
+throughput: 9487.095229 (B/us)
+
+size = 512k
+run 10000000 cycles, length is 524288, first 4 char: abcd
+max: 8920145 ticks, 2792.005385 us
+min: 163742 ticks, 51.251246 us
+avg: 230118.349986 ticks, 72.027044 us
+throughput: 10229.761048 (B/us)
 
 ===using PERF and strace===
 ---PERF---

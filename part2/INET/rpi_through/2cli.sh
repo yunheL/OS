@@ -1,3 +1,3 @@
 #!/bin/bash
 echo "client side start"
-client emperor-02 7000 524288
+client emperor-05 7000 262144

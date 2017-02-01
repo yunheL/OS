@@ -10,7 +10,8 @@
 #include <netinet/in.h>
 #include <unistd.h>
 #include <netinet/tcp.h>
-#define NUMLOOPS 3
+#define NUMLOOPS 10000000
+//#define NUMLOOPS 5
 //#define NUMRUNS 3
 
 void error(char *msg)
@@ -21,6 +22,7 @@ void error(char *msg)
 
 int main(int argc, char *argv[])
 {
+
 	cpu_set_t mask;
 	CPU_ZERO(&mask);
 	CPU_SET(2,&mask);
@@ -74,18 +76,18 @@ int main(int argc, char *argv[])
 		{
 			n0 = read(newsockfd,buffer+k,buf_size-k);
 			if (n0 < 0) error("ERROR reading from socket");
-			printf("have read: %d bytes\n", n0);
-			read_num = read_num + n0;
+//			printf("have read: %d bytes\n", n0);
+//			read_num = read_num + n0;
 		}
 		for(k=0; k<buf_size; k=k+n1)
 		{
 			n1 = write(newsockfd,buffer+k,buf_size-k);
 			if (n1 < 0) error("ERROR writing to socket");
-			printf("have written: %d bytes\n", n1);	
+//			printf("have written: %d bytes\n", n1);	
 		}
 	}
 //	}
-	printf("read_num: %d\n", read_num);
+//	printf("read_num: %d\n", read_num);
 	if(-1 == close(sockfd))
 		error("close0 failed");
 	if(-1 == close(newsockfd))
