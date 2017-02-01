@@ -10,8 +10,7 @@
 #include <unistd.h>
 #include <netinet/tcp.h>
 #include "rdtsc.h"
-#define NUMLOOPS 10000000
-#define FREQ 0.000313
+#define NUMLOOPS 3
 //#define NUMRUNS 3
 
 void error(char *msg)
@@ -82,10 +81,7 @@ int main(int argc, char *argv[])
 	error("ERROR connecting");
 
 	int i,k;
-	int read_num = 0;
-	double progress = 0;
-	double interval = 100/(double)NUMLOOPS;
-	int progress_counter = 0;	
+	int read_num = 0;	
 	k = 0; // use k to keep track of bytes written and have read
 	for(i=0; i<NUMLOOPS; i++)
 	{
@@ -106,8 +102,9 @@ int main(int argc, char *argv[])
 			if (n0 < 0) 
 				error("ERROR writing to socket");
 
-//			printf("have written: %d bytes\n", n0);
+			printf("have written: %d bytes\n", n0);
 		}
+		b = rdtsc();
 		//these two loops cannot be combined to one
 		for(k=0; k<payload_len; k=k+n1)
 		{
@@ -116,10 +113,9 @@ int main(int argc, char *argv[])
 			if (n1 < 0) 
 				error("ERROR reading from socket");
 
-//			printf("have read: %d bytes\n", n1);
-//			read_num = read_num + n1;
+			printf("have read: %d bytes\n", n1);
+			read_num = read_num + n1;
 		}
-		b = rdtsc();
 		diff = b-a;
 		//end timing
 
@@ -136,31 +132,17 @@ int main(int argc, char *argv[])
 		}
 
 		sum += diff;
-		progress = progress + interval;
-		if (progress>=5)
-		{
-			progress_counter = progress_counter+5;
-			progress = 0;
-			printf("progress: %d percent\n", progress_counter);
-		}
-		//printf("progress: %lf percent\n", progress);
 		//printf("diff: %llu ticks\n", diff);
 	}
-//	printf("read_num: %d\n", read_num);
-	printf("run %d cycles, length is %zu, first 4 char: %.*s\n", i, sizeof(buffer1), 4,buffer1);
+	printf("read_num: %d\n", read_num);
+	printf("length is %zu, first 4 char: %.*s\n", sizeof(buffer1), 4,buffer1);
 	if(-1 == close(sockfd))
 		error("close failed\n");
 
 	avg = ((double)sum)/NUMLOOPS;
-
-	double max_us, min_us, avg_us;
-	max_us = max*FREQ;
-	min_us = min*FREQ;
-	avg_us = avg*FREQ;
-
-	printf("max: %llu ticks, %lf us\n", max, max_us);
-	printf("min: %llu ticks, %lf us\n", min, min_us);
-	printf("avg: %lf ticks, %lf us\n", avg, avg_us);
+	printf("max: %llu ticks\n", max);
+	printf("min: %llu ticks\n", min);
+	printf("avg: %lf ticks\n", avg);
 //	}
 	return 0;
 }

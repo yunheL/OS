@@ -43,6 +43,8 @@ min: 15.371749 ns
 avg: 15.423429 ns
 
 ===socket===
+
+---latency---
 1. set flags TCP_NODELAY, SO_REUSEADDR
 2. remove other operating between read and write so that we are not timing anything else than latency, especially the print statement, saved lots of time
 3. generate payload to fulfill the length requirement
@@ -55,131 +57,63 @@ avg: 15.423429 ns
 9. Also you want the server to send back msg with the same size so that the round trip time actually make sense. 
 10. "Transmission times can be affecting in TCP by the MTU (maximum transmission unit) size (typically 1500 bytes) and read and write buffer sizes (typically 128KB. If you have root access to a Linux system, you can experiment with increasing these sizes. Of course, you will not be allowed to do that on the instructional Linux systems. "
 11. put the write and read in a loop to ensure the length of msg is desired.
+12. made sure to divide the round trip time by 2
+13. also made sure that the client and server program are running on two different cores.
+14. make sure all the units are B/us, which has the same value of MB/s
+15. way to determin the number of iternations is to see whether the result from each time is fairly stable, and also, changing into a larger number won't really gave us a short min time.
+16. an obervation is that the avg value gets pretty stable with NUMLOOPs hit 10^4 but the min would get stable until 10^7
 
 size = 4
-1st run
-max: 12285584 ticks
-min: 199788 ticks
-avg: 316489.329940 ticks
-
-2nd run
-max: 29009744 ticks
-min: 198000 ticks
-avg: 274438.620370 ticks
-
-3rd run
-max: 58008666 ticks
-min: 196952 ticks
-avg: 295951.005660 ticks
-
-4th run
-max: 9139291 ns
-min: 61390 ns
-avg: 98581.130660 ns
-
-5th run
-max: 6000315 ns
-min: 61601 ns
-avg: 92163.854510 ns
-
-6th run
-max: 4128016 ns
-min: 60172 ns
-avg: 94187.986970 ns
+run 10000000 cycles, length is 4, first 4 char: abcd
+max: 38868544 ticks, 12165.854272 us
+min: 24684 ticks, 7.726092 us
+avg: 51191.064663 ticks, 16.022803 us
 
 size = 16
-1st run
-max: 20477296 ticks
-min: 202684 ticks
-avg: 306887.813420 ticks
+run 10000000 cycles, length is 16, first 4 char: abcd
+max: 37279366 ticks, 11668.441558 us
+min: 25616 ticks, 8.017808 us
+avg: 51260.274445 ticks, 16.044466 us
 
-2nd run
-max: 32054620 ticks
-min: 199920 ticks
-avg: 302505.346310 ticks
+run 10000000 cycles, length is 64, first 4 char: abcd
+max: 40900030 ticks, 12801.709390 us
+min: 25291 ticks, 7.916083 us
+avg: 51432.047803 ticks, 16.098231 us
 
-3rd run
-max: 21217152 ticks
-min: 201736 ticks
-avg: 289345.036210 ticks
+run 10000000 cycles, length is 256, first 4 char: abcd
+max: 43181143 ticks, 13515.697759 us
+min: 25975 ticks, 8.130175 us
+avg: 51253.569981 ticks, 16.042367 us
 
-4th run
-max: 11733415 ns
-min: 63769 ns
-avg: 98092.871550 ns
+run 10000000 cycles, length is 1024, first 4 char: abcd
+max: 43298263 ticks, 13552.356319 us
+min: 25451 ticks, 7.966163 us
+avg: 52762.593741 ticks, 16.514692 us
 
-5th run
-max: 8474847 ns
-min: 62669 ns
-avg: 92791.558650 ns
+---throughput---
+1. use a counter to keep track of the number of bytes being sent
 
-6th run
-max: 9417547 ns
-min: 64689 ns
-avg: 100018.381050 ns
 
-size = 64
-1st run 
-max: 270694088 ticks
-min: 236156 ticks
-avg: 604935.661060 ticks
+===using PERF and strace===
+---PERF---
+perf record + your own program
+perf report
 
-2nd run
-max: 27844677 ticks
-min: 260604 ticks
-avg: 588142.541390 ticks
+---strace---
+strace -ttT + your own program
 
-3rd run
-max: 23007664 ticks
-min: 285472 ticks
-avg: 594994.047870 ticks
+===todo on Tuesday night===
+1. finish up experiment
+2. figure out performance
+3. record video for part1
+4. write paper for part2 
 
-4th run
-max: 14075076 ns
-min: 89617 ns
-avg: 183497.997150 ns
-
-5th run
-max: 9571040 ns
-min: 90349 ns
-avg: 185865.520620 ns
-
-6th run
-max: 8988571 ns
-min: 92201 ns
-avg: 190648.571650 ns
-
-size = 256
-1st run
-max: 30032932 ticks
-min: 304240 ticks
-avg: 643998.162460 ticks
-
-2nd run
-max: 38633168 ticks
-min: 353208 ticks
-avg: 686288.537820 ticks
-
-3rd run
-max: 23428128 ticks
-min: 341408 ticks
-avg: 648245.159200 ticks
-
-4th run
-max: 7023738 ns
-min: 92701 ns
-avg: 207101.698860 ns
-
-5th run
-max: 8078583 ns
-min: 100816 ns
-avg: 207747.516520 ns
-
-6th run
-max: 9539733 ns
-min: 99610 ns
-avg: 205530.689920 ns
-
+===Tuesday left off===
+1. experimenting with latency finished size of 4, 16, 64, 256, 1k
+2. todos within experiment: finish latency, modify throughput code to make
+it situable for experiment (build shell script for through put experiments as well)
+3. finish throughput code
+4. maybe want to distributed work to multiple machines especially those needs longer times 
 
 ===point to make sure===
 1. 3 type of average. arthimatic, harmonic and geometric.
