@@ -1,0 +1,91 @@
+#define _GNU_SOURCE
+#include <sched.h>
+#include <time.h>
+#include <sys/time.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdint.h>
+
+#include "rdtsc.h"
+
+
+#define BILLION 1000000000L
+
+int main (int argc, char **argv)
+{
+	if(argc < 2)
+	{
+		printf("Need number of loop iterations\n");
+		return 1;
+	}
+	//Set the process to stay on CPU[2]
+	cpu_set_t mask;
+	CPU_ZERO(&mask);
+	CPU_SET(2,&mask);
+	sched_setaffinity(0, sizeof(mask), &mask);
+
+	int iterations = atoi(argv[1]);
+	//int sum = 0, a = 1;
+
+	unsigned long long startRD, endRD;
+	struct timespec start, end;
+	int  i;
+	double diff;
+	double minDiff = 100;
+	double rdtscDiff, rdtscTicks, rdtscFreq_us, rdtscDiffTime;
+	double minrdtscDiffTime = 100;
+	int j;
+	double minTicks = 100;
+	double maxTicks = 0;
+
+	for(j = 0; j < 100000000; j++)
+	{
+		clock_gettime(CLOCK_MONOTONIC, &start);
+		for(i = 0; i < iterations; i++)
+		{
+		}
+		clock_gettime(CLOCK_MONOTONIC, &end);
+		diff = (end.tv_sec - start.tv_sec)*BILLION + (end.tv_nsec - start.tv_nsec); 
+		//printf("gettime timing(us): %lf\n", (diff/1000));
+		if(diff < minDiff)
+		{
+			minDiff = diff;
+		}
+		//sum = 0;
+		startRD = rdtsc();
+		for (i = 0; i < iterations; i++)
+		{
+		}
+		endRD = rdtsc();
+		rdtscDiff = endRD - startRD;
+	
+		//determine frequency for rdtsc
+		/*startRD = rdtsc();
+		sleep(1);
+		endRD = rdtsc();
+		rdtscTicks = endRD - startRD;*/
+		if(rdtscDiff < minTicks)
+		{
+			minTicks = rdtscDiff;
+		}
+		if(rdtscDiff > maxTicks)
+		{
+			maxTicks = rdtscDiff;
+		}
+		rdtscFreq_us = 0.000313;
+		rdtscDiffTime = rdtscDiff * rdtscFreq_us;
+		if(rdtscDiffTime < minrdtscDiffTime)
+		{
+			minrdtscDiffTime = rdtscDiffTime;
+		}
+		//printf("rdtsc timing(us): %lf\n",rdtscDiffTime);
+	
+		//printf("difference between the two(us): %lf\n",((diff/1000)-rdtscDiffTime));	
+	}
+	printf("min gettime (us): %lf\n",(minDiff/1000));
+	printf("min rdtsc (us): %lf\n", minrdtscDiffTime);
+	printf("min rdtsc (ticks): %lf\n", minTicks);
+	printf("max rdtsc (ticks): %lf\n", maxTicks);
+	return 0;	
+	
+}
