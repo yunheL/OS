@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
 
 /*
  This snapshot of the code is a record of idea
