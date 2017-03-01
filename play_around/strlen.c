@@ -14,9 +14,9 @@
 
 int main()
 {
-	s = "hello";
-	t = 0;
-	l = strlen(l);
+	char* s = "hello";
+	uint32_t t = 0;
+	uint32_t l = strlen(l);
 
 	//a O(n^2) algorithm
 	for(int i = 0; i<strlen(s); i++)
