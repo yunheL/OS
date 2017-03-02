@@ -8,6 +8,8 @@
 
 #define BILLION 1000000000L
 
+//TODO looks like diff0 and diff1 is not correct. The value is too large.
+
 int main()
 {
 
