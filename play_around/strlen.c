@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <stddef.h>
+#include <string.h>
 
 /*
  This snapshot of the code is a record of idea
@@ -17,18 +19,21 @@ int main()
 {
 	char* s = "hello";
 	uint32_t t = 0;
-	uint32_t l = strlen(l);
+	size_t l = strlen(s);
+	int i = 0;
 
 	//a O(n^2) algorithm
-	for(int i = 0; i<strlen(s); i++)
+	for(i = 0; i<strlen(s); i++)
 	{
-		t += s(i);
+		t += s[i];
 	}
 
 	//a O(n) algorithm
-	for(int i = 0; i<l; i++)
+	for(i = 0; i<l; i++)
 	{
-		t += s(i);
+		t += s[i];
 	}
+
+	return 0;
 
 }
