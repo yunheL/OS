@@ -11,7 +11,9 @@
 int main()
 {
 
-	uint64_t diff;
+	uint64_t diff0;//timing of O(n^2)
+	uint64_t diff1;//timing of O(n)
+	uint64_t diff;//timing difference between O(n^2) and O(n)
 	struct timespec start, end;
 
 	char* s = "helloworldhelloworldhelloworldhelloworldhelloworldhelloworld";
@@ -26,8 +28,8 @@ int main()
 		t += s[i];
 	}
 	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end);			
-	diff = BILLION * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
-	printf("O(n^2) elapsed time = %llu nanoseconds\n", (long long unsigned int) diff);
+	diff0 = BILLION * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
+	printf("O(n^2) elapsed time = %llu nanoseconds\n", (long long unsigned int) diff0);
 
 	//a O(n) algorithm
 	clock_gettime(CLOCK_MONOTONIC, &start);
@@ -36,8 +38,11 @@ int main()
 		t += s[i];
 	}
 	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end);			
-	diff = BILLION * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
-	printf("O(n) elapsed time = %llu nanoseconds\n", (long long unsigned int) diff);
+	diff1 = BILLION * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
+	printf("O(n) elapsed time = %llu nanoseconds\n", (long long unsigned int) diff1);
+
+	diff = diff0-diff1;	
+	printf("diff = %llu nanoseconds\n", (long long unsigned int) diff);
 
 	return 0;
 }
