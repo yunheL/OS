@@ -9,6 +9,8 @@
 #define BILLION 1000000000L
 
 //TODO looks like diff0 and diff1 is not correct. The value is too large.
+//TODO tried to use a single char for string s, the difference didn't
+//	decrease at all. Not correct.
 
 int main()
 {
@@ -18,7 +20,8 @@ int main()
 	uint64_t diff;//timing difference between O(n^2) and O(n)
 	struct timespec start, end;
 
-	char* s = "helloworldhelloworldhelloworldhelloworldhelloworldhelloworld";
+//	char* s = "helloworldhelloworldhelloworldhelloworldhelloworldhelloworld";
+	char* s = "h";
 	uint32_t t = 0;
 	size_t l = strlen(s);
 	int i = 0;
