@@ -13,7 +13,8 @@ insert(void* vnode, _Bool isLeaf, KeyType newkey, RecordType newval, KeyType* up
     uint8_t n = SIZE(node);
     uint8_t pos_slot = -1;
     uint8_t pos_key = -1;
-    if (1) {
+    //binary search
+    {
       int l = 0, r = n;
       while (l < r) {
         int m = l + (r - l) / 2;
