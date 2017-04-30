@@ -20,9 +20,15 @@ mem_flush(volatile void *p)
   asm volatile ("clflush (%0)" :: "r"(p));
   asm volatile ("mfence");
 }
+void
 cflush(volatile void *p)
 {
-    asm volatile ("cflush (%0)" :: "r"(p));
+    asm volatile ("clflush (%0)" :: "r"(p));
+}
+void
+mfence()
+{
+    asm volatile ("mfence");
 }
 
 int write_journal(node* root,
@@ -122,7 +128,6 @@ remove_child(node* n, int lkey){
                 i++;
             }
             n->num_keys--; 
-            cflush(n->log);
             n->log->consistent = 3;
         }
         
@@ -172,7 +177,6 @@ merge(node* left_node, node* right_node){
         *(left_node->pointers+left_node->num_keys+i+1) = *(right_node->pointers + i);
     }
     left_node->num_keys = right_node->num_keys + left_node->num_keys;
-    mem_flush(left_node->log);
     left_node->log->num_keys = left_node->num_keys;
     //remove right node from parents pointers
     remove_child(parent,right_lkey);
@@ -267,8 +271,6 @@ get_left(node* n, int lkey){
         if(n->log->num_keys != n->num_keys){
             left_node->num_keys--;
         }
-        mem_flush(n->log);
-        mem_flush(left_node->log);
         n->log->num_keys = n->num_keys; 
         left_node->log->num_keys = left_node->num_keys;
         
@@ -317,10 +319,8 @@ get_right(node* n){
         *(child_arr+n->num_keys) = take_key;
         n->pointers[n->num_keys+1] = value;
         n->num_keys++;
-        mem_flush(n->log);
         n->log->num_keys = n->num_keys;
         right_node->num_keys--;
-        mem_flush(right_node->log);
         right_node->log->num_keys = right_node->num_keys;
 
 
@@ -335,7 +335,6 @@ get_right(node* n){
                 *(right_node->pointers+i) = *(right_node->pointers+i+1);
             }
             right_node->num_keys--;
-           	mem_flush(right_node->log);
             right_node->log->num_keys = right_node->num_keys;
 
         }
@@ -345,7 +344,6 @@ get_right(node* n){
                 *(right_node->pointers+i) = *(right_node->pointers+i+1);
                 i++;
             }
-            mem_flush(right_node->log);
             right_node->log->num_keys = right_node->num_keys;
         }       
         
@@ -391,7 +389,6 @@ delete_from_node_hard(node* leaf, int key){
                 i++;
             }
             leaf->num_keys--;  
-            mem_flush(leaf->log);
             leaf->log->consistent = 3;   
         }
         
@@ -502,10 +499,12 @@ make_consistent_delete_hard(node* n){
     bool found_key;
     int *arr = n->keys;
     if(n->log->split = 0 || n->log->consistent == 1 || n->log->consistent == 0){
-        n->log->consistent = 0;
-        mem_flush(n->log);
+        cflush(n->log);
+        mfence();
         n->log->key = -1;
         n->log->split = 0;
+        n->log->consistent = 0;
+        cflush(n->log);
         return n;
     }
     //check to see if key still in node
@@ -538,8 +537,10 @@ make_consistent_delete_hard(node* n){
 node*
 make_consistent_delete_simple(node* n, int flag){
     if(flag == 0 || n->log->consistent == 1 || n->log->consistent == 0){
+        cflush(n->log);
+        mfence();
         n->log->consistent = 0;
-        mem_flush(n->log);
+        cflush(n->log);
         n->log->key = -1;
         return n;
     }
@@ -549,8 +550,10 @@ make_consistent_delete_simple(node* n, int flag){
        delete_from_node_simple(n,n->log->key);
     }
     n->log->num_keys = n->num_keys;
+    cflush(n->log);
+    mfence();
     n->log->consistent = 0;
-    mem_flush(n->log);
+    cflush(n->log);
     return n;
 }
 
@@ -601,9 +604,11 @@ delete_key(node* root, int key, int crash){
         0,
         crash,
         1); //delete
-        make_consistent_delete_simple(leaf,1); 
+        make_consistent_delete_simple(leaf,1);
+        cflush(leaf->log);
+        mfence(); 
         leaf->log->consistent = 0;
-        mem_flush(leaf->log);
+        cflush(leaf->log);
     }
     else{
         write_journal(root,
@@ -616,8 +621,10 @@ delete_key(node* root, int key, int crash){
         1); //delete
         make_consistent_delete_hard(leaf);
         if(leaf->log != NULL){
+            cflush(leaf->log);
+            mfence();
             leaf->log->consistent = 0;
-            mem_flush(leaf->log);
+            cflush(leaf->log);
         }
         
     }
@@ -796,9 +803,11 @@ make_consistent_simple(node* n, int flag){
     // Reset journal and get the hell out.
     
     if(flag == 0 || n->log->consistent == 1 || n->log->consistent == 0){
+    cflush(n->log);
+    mfence();
 	n->log->consistent = 0;
-	mem_flush(n->log);
 	n->log->key = -1;
+    cflush(n->log);
         return n;
     }
     
@@ -824,8 +833,10 @@ make_consistent_simple(node* n, int flag){
     
     // this has to happen regardless
     n->num_keys = n->log->num_keys;
+    cflush(n->log);
+    mfence();
     n->log->consistent = 0;
-    mem_flush(n->log);
+    cflush(n->log);
     return n;
 }
 
@@ -1075,10 +1086,12 @@ make_consistent_split(node* root,
     // we wrote in there.
     // Otherwise there is nothing to make consistent    
     if(n->log->consistent == 1 || n->log->consistent == 0 || n->log->split == 0){
+    cflush(n->log);
+    mfence();
 	n->log->split = 0;
 	n->log->consistent = 0;
-	mem_flush(n->log);
 	n->log->key = -1;
+    cflush(n->log);
 	return root;
     }
     
@@ -1106,7 +1119,7 @@ make_consistent_split(node* root,
     if(crash == 10){
 	//printf("%sSystem crashed midway through splitting of leaf node%s\n", KRED, KWHT);    
 	return root;
-    }    
+    }
     //*****************************************
     
     node* left = make_leaf();
@@ -1198,13 +1211,14 @@ int write_journal(node* root,
     if(l->split != 0){
         make_consistent_delete_hard(n);
         l->split = 0;
-        mem_flush(l);
         return 1;
     }
     int flag = check_consistency_delete_simple(n);
 	make_consistent_delete_simple(n, flag);
+    cflush(l);
+    mfence();
     l->consistent = 0;
-    mem_flush(l);
+    cflush(l);
    }
     
     /* now check if it needs a split cleanup? */
@@ -1217,7 +1231,6 @@ int write_journal(node* root,
 	//printf("Handle that business first before I let you write new stuff\n");
         //printf("THis key is sitting in my log %d\n", n->log->key);
 	make_consistent_split(root, n, crash);
-	mem_flush(n->log);
 	n->log->split =0; // split is fine
 	return 1;
     }
@@ -1226,8 +1239,10 @@ int write_journal(node* root,
     if(n->log->consistent == 2 ){
 	int flag = check_consistency_simple(n);
 	n = make_consistent_simple(n, flag);
-	n->log->consistent = 0;
-	mem_flush(n->log);        	
+    cflush(n->log);
+    mfence();
+	n->log->consistent = 0;       	
+    cflush(n->log);
     }
     
     // Journal write begin
@@ -1243,7 +1258,6 @@ int write_journal(node* root,
     //************************
     
     l->num_keys = n->num_keys + 1;
-    mem_flush(l);
     //******DANGER***************
     if(crash == 7){
 	//printf("%sJournal write incomplete II: Should ignore this write%s\n", KRED, KWHT);   
@@ -1254,7 +1268,6 @@ int write_journal(node* root,
     l->key = key;    
     if(n->is_leaf){
 	l->left = (record*)left;
-	mem_flush(l);
     }
     // it'll be a pointer to another node
     else{
@@ -1263,16 +1276,16 @@ int write_journal(node* root,
     }
     //******DANGER***************
     if(crash == 8){
-	//printf("%sJournal write incomplete III: Should ignore this write%s\n", KRED, KWHT);	   
+	//printf("%sJournal write incomplete III: Should ignore this write%s\n", KRED, KWHT);
 	return 0;
     }        
     // Node has had value and key written to it, so now if I turn the split
     // flag I'll know how to split it up
     l->split = split;
-    mem_flush(l); 
-      
+    cflush(l);
+    mfence();
     l->consistent = 2;
-    mem_flush(l);
+    cflush(l);
     // Journal write end
     return 0;
 }
