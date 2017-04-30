@@ -36,7 +36,7 @@ typedef struct node {
     int space;
 } node;
 
-int order= 15;
+int order= 32;
 int verbose_output = 0;
 
 void get_right(node* n);
