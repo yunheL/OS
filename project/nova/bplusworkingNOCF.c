@@ -1,4 +1,8 @@
 #include "bplus_tree.h"
+#include "time.h"
+#include "stdint.h"
+
+#define BILLION 1000000000L
 
 /*
  * Function:  duplicate
@@ -1393,23 +1397,28 @@ traverse(node*root, node* n){
 int main(int argc, char* argv[]){
     node* root = NULL;
     int i,x=-1000;
-    
+    uint64_t diff;
+    struct timespec start,end;
+    clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&start);
     for(i=0; i< atoi(argv[1]); i++){
 	/* x = rand_interval(0,10); */
-	x++;
-        //printf("INSERTING %d Random number generated: %d\n", 2*i, x);	
+	//x++;
+        //printf("INSERTING %d Random number generated: %d\n", 2*i, x);
         root = insert(root,2*i, 9, x);	
 	//printf("\n");
 
 	//printf("STATE IMMEDIATELY AFTER CRASH\n");
 	//print_tree(root);
-	if(x>0){
-	    root = traverse(root, root);
-	}
+	//if(x>0){
+	//  root = traverse(root, root);
+	//	}
 	//printf("\nSTATE AFTER JOURNAL PLAYBACK\n");	
 	//print_tree(root);
 	//printf("========================================\n");
     }
+    clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&end);
+    diff = BILLION * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
+    printf("Time (ns): %llu\n",(long long unsigned int)diff);
    //root = insert(root,3,9);
     int d;
     //root = insert(root,7,9,x);

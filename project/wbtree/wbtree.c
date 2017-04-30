@@ -389,10 +389,10 @@ void test2(Tree* tree) {
   print_lookup(tree, 4504);
 }
 void test3(Tree* tree) {
-  for (int i = 0; i < 4*7+7 +1; i++) {
+  for (int i = 0; i < 1000000; i++) {
     insert_ng(tree, i, i*3);
   }
-  print_tree(tree->root, tree->height);
+//  print_tree(tree->root, tree->height);
   print_lookup(tree, 21);
   print_lookup(tree, 0);
   print_lookup(tree, 35);
