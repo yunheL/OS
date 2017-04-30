@@ -14,23 +14,23 @@ int main()
 	// }
 
 	// sequential test
-	for(int i = 0; i < 1000; ++i)
+	for(int i = 0; i < 1000000; ++i)
 	{
 		// std::cout << "insert " << i << std::endl;
 		btree.insert(i);
 	}
 
-	for(int i = 0; i < 100; ++i)
-	{
+//	for(int i = 0; i < 100; ++i)
+//	{
 		// std::cout << "insert " << i << std::endl;
-		btree.insert(i);
-	}
+//		btree.insert(i);
+//	}
 
-	for(int i = 134; i < 578; ++i)
-	{
+//	for(int i = 134; i < 578; ++i)
+//	{
 		// std::cout << "insert " << i << std::endl;
-		btree.insert(i);
-	}
+//		btree.insert(i);
+//	}
 
 	// for(int i = 0; i < 3000; ++i)
 	// {
@@ -42,17 +42,17 @@ int main()
 	// 	// std::cout << "remove done" << std::endl;
 	// }
 
-	for(int i = 0; i < 700; ++i)
-	{
-		btree.remove(i + 100);
+//	for(int i = 0; i < 700; ++i)
+//	{
+//		btree.remove(i + 100);
 		// std::cout << "remove done" << std::endl;
-	}
+//	}
 
-	btree.lookUp(54, 913);
+//	btree.lookUp(54, 913);
 
-	std::cout << "single key test" << std::endl;
+//	std::cout << "single key test" << std::endl;
 	// btree.lookUp(0, 999);
-	btree.lookUp(933);
+//	btree.lookUp(933);
 
 	std::cout << "# mfence = " << mfenceCount << std::endl;
 	std::cout << "# clflush = " << clflushCount << std::endl;
