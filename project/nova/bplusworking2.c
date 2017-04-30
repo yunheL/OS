@@ -20,6 +20,11 @@ mem_flush(volatile void *p)
   asm volatile ("clflush (%0)" :: "r"(p));
   asm volatile ("mfence");
 }
+void
+cflush(volatile void *p)
+{
+    asm volatile ("clflush (%0)" :: "r"(p));
+}
 
 int write_journal(node* root,
           node* n,
@@ -263,8 +268,8 @@ get_left(node* n, int lkey){
         if(n->log->num_keys != n->num_keys){
             left_node->num_keys--;
         }
-        mem_flush(n->log);
-        mem_flush(left_node->log);
+        cflush(n->log);
+        cflush(left_node->log);
         n->log->num_keys = n->num_keys; 
         left_node->log->num_keys = left_node->num_keys;
         
@@ -341,8 +346,8 @@ get_right(node* n){
                 *(right_node->pointers+i) = *(right_node->pointers+i+1);
                 i++;
             }
-            mem_flush(right_node->log);
             right_node->log->num_keys = right_node->num_keys;
+	    cflush(right_node->log);
         }       
         
         
@@ -497,7 +502,7 @@ make_consistent_delete_hard(node* n){
     int i;
     bool found_key;
     int *arr = n->keys;
-    if(n->log->split == 0 || n->log->consistent == 1 || n->log->consistent == 0){
+    if(n->log->split = 0 || n->log->consistent == 1 || n->log->consistent == 0){
         n->log->consistent = 0;
         mem_flush(n->log);
         n->log->key = -1;
@@ -521,7 +526,7 @@ make_consistent_delete_hard(node* n){
         delete_from_node_hard(n,n->log->key);
     }
     
-    return n;
+
 }
 
 /*
@@ -546,7 +551,7 @@ make_consistent_delete_simple(node* n, int flag){
     }
     n->log->num_keys = n->num_keys;
     n->log->consistent = 0;
-    mem_flush(n->log);
+    cflush(n->log);
     return n;
 }
 
@@ -599,7 +604,7 @@ delete_key(node* root, int key, int crash){
         1); //delete
         make_consistent_delete_simple(leaf,1); 
         leaf->log->consistent = 0;
-        mem_flush(leaf->log);
+        cflush(leaf->log);
     }
     else{
         write_journal(root,
@@ -613,7 +618,7 @@ delete_key(node* root, int key, int crash){
         make_consistent_delete_hard(leaf);
         if(leaf->log != NULL){
             leaf->log->consistent = 0;
-            mem_flush(leaf->log);
+            cflush(leaf->log);
         }
         
     }
@@ -793,7 +798,7 @@ make_consistent_simple(node* n, int flag){
     
     if(flag == 0 || n->log->consistent == 1 || n->log->consistent == 0){
 	n->log->consistent = 0;
-	mem_flush(n->log);
+	cflush(n->log);
 	n->log->key = -1;
         return n;
     }
@@ -821,7 +826,7 @@ make_consistent_simple(node* n, int flag){
     // this has to happen regardless
     n->num_keys = n->log->num_keys;
     n->log->consistent = 0;
-    mem_flush(n->log);
+    cflush(n->log);
     return n;
 }
 
@@ -1102,7 +1107,7 @@ make_consistent_split(node* root,
     if(crash == 10){
 	//printf("%sSystem crashed midway through splitting of leaf node%s\n", KRED, KWHT);    
 	return root;
-    }    
+    }
     //*****************************************
     
     node* left = make_leaf();
@@ -1194,13 +1199,13 @@ int write_journal(node* root,
     if(l->split != 0){
         make_consistent_delete_hard(n);
         l->split = 0;
-        mem_flush(l);
+        cflush(l);
         return 1;
     }
     int flag = check_consistency_delete_simple(n);
 	make_consistent_delete_simple(n, flag);
     l->consistent = 0;
-    mem_flush(l);
+    cflush(l);
    }
     
     /* now check if it needs a split cleanup? */
@@ -1223,7 +1228,7 @@ int write_journal(node* root,
 	int flag = check_consistency_simple(n);
 	n = make_consistent_simple(n, flag);
 	n->log->consistent = 0;
-	mem_flush(n->log);        	
+	cflush(n->log);        	
     }
     
     // Journal write begin
@@ -1239,7 +1244,7 @@ int write_journal(node* root,
     //************************
     
     l->num_keys = n->num_keys + 1;
-    mem_flush(l);
+    cflush(l);
     //******DANGER***************
     if(crash == 7){
 	//printf("%sJournal write incomplete II: Should ignore this write%s\n", KRED, KWHT);   
@@ -1250,7 +1255,7 @@ int write_journal(node* root,
     l->key = key;    
     if(n->is_leaf){
 	l->left = (record*)left;
-	mem_flush(l);
+	cflush(l);
     }
     // it'll be a pointer to another node
     else{
@@ -1259,16 +1264,16 @@ int write_journal(node* root,
     }
     //******DANGER***************
     if(crash == 8){
-	//printf("%sJournal write incomplete III: Should ignore this write%s\n", KRED, KWHT);	   
+	//printf("%sJournal write incomplete III: Should ignore this write%s\n", KRED, KWHT);
 	return 0;
     }        
     // Node has had value and key written to it, so now if I turn the split
     // flag I'll know how to split it up
     l->split = split;
-    mem_flush(l); 
+    cflush(l); 
       
     l->consistent = 2;
-    mem_flush(l);
+    cflush(l);
     // Journal write end
     return 0;
 }
