@@ -7,15 +7,15 @@
 #define CacheLineSize 64
 #define NumCacheLinesPerNode 4
 // TODO
-#define BranchFactorInternal (CacheLineSize*NumCacheLinesPerNode - 3*sizeof(void*) - sizeof(bool) )/(sizeof(int) + sizeof(void*))
-#define BranchFactorLeaf (CacheLineSize*NumCacheLinesPerNode - sizeof(int) - 4*sizeof(void*) - sizeof(bool) )/(sizeof(int) + sizeof(void*))
+// #define BranchFactorInternal (CacheLineSize*NumCacheLinesPerNode - 3*sizeof(void*) - sizeof(bool) )/(sizeof(int) + sizeof(void*))
+// #define BranchFactorLeaf (CacheLineSize*NumCacheLinesPerNode - sizeof(int) - 4*sizeof(void*) - sizeof(bool) )/(sizeof(int) + sizeof(void*))
 
 // #define utiLimitNonLeaf BranchFactorInternal/5
 // #define utiLimitLeaf BranchFactorLeaf/5
 
 // for test
-// #define BranchFactorInternal 6
-// #define BranchFactorLeaf 6
+#define BranchFactorInternal 32
+#define BranchFactorLeaf 32
 
 
 #define Infinite INT_MAX

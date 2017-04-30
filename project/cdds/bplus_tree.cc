@@ -782,6 +782,7 @@ Node::balanceChilds(int pos_1, int pos_2)
         {
             tempArr[newPos] = leftChild->entries[i];
             assert(leftChild->entries[i].valid);
+            assert(leftChild->entries[i].pointer != nullptr);
             ++newPos;
         }
         // dec ref counter on old data
@@ -789,6 +790,7 @@ Node::balanceChilds(int pos_1, int pos_2)
         {
             // for record
             Record* r = reinterpret_cast<Record*> (leftChild->entries[i].pointer);
+            assert(r != nullptr);
             r->decRefCounter();
             if(r->isRefZero())
                 deleteRecordList(r);
@@ -797,6 +799,7 @@ Node::balanceChilds(int pos_1, int pos_2)
         {
             // for node
             Node* n = reinterpret_cast<Node*> (leftChild->entries[i].pointer);
+            assert(n != nullptr);
             n->decRefCounter();
             if(n->isRefZero())
             {
@@ -819,6 +822,7 @@ Node::balanceChilds(int pos_1, int pos_2)
         if(rightChild->entries[i].version.second == 0)
         {
             assert(rightChild->entries[i].valid);
+            assert(rightChild->entries[i].pointer != nullptr);
             tempArr[newPos] = rightChild->entries[i];
             ++newPos;
         }
@@ -829,6 +833,7 @@ Node::balanceChilds(int pos_1, int pos_2)
             {
                 // for record
                 Record* r = reinterpret_cast<Record*> (rightChild->entries[i].pointer);
+                assert(r != nullptr);
                 r->decRefCounter();
                 if(r->isRefZero())
                     deleteRecordList(r);
@@ -837,6 +842,7 @@ Node::balanceChilds(int pos_1, int pos_2)
             {
                 // for node
                 Node* n = reinterpret_cast<Node*> (rightChild->entries[i].pointer);
+                assert(n != nullptr);
                 n->decRefCounter();
                 if(n->isRefZero())
                 {
@@ -851,6 +857,8 @@ Node::balanceChilds(int pos_1, int pos_2)
     assert(newPos == size);
     // assert(tempArr[newPos].key == Infinite);
 
+    // std::cout << "copy from originial nodes in balance finishsed" << std::endl;
+
     Node* newNodeLeft;
     Node* newNodeRight;
     Entry* newParentEntryList;
@@ -858,7 +866,7 @@ Node::balanceChilds(int pos_1, int pos_2)
     if(leftChild->is_leaf)
     {
         assert(rightChild->is_leaf);
-        Entry* newParentEntryList = new Entry[BranchFactorLeaf];
+        newParentEntryList = new Entry[BranchFactorLeaf];
 
         newNodeLeft = new LeafNode;
         newNodeRight = new LeafNode;
@@ -871,7 +879,7 @@ Node::balanceChilds(int pos_1, int pos_2)
     else
     {
         assert(!rightChild->is_leaf);
-        Entry* newParentEntryList = new Entry[BranchFactorInternal];
+        newParentEntryList = new Entry[BranchFactorInternal];
 
         newNodeLeft = new Node;
         newNodeRight = new Node;
@@ -930,12 +938,28 @@ Node::balanceChilds(int pos_1, int pos_2)
     clflush(&(newNodeRight->num_entries));
     mfence();
 
+    delete[] tempArr;
+
+    // for debug
+    // std::cout << "constructing new nodes completed in merge" << std::endl;
+
     int parentIdx = 0;
     count = 0;
     for(int i = 0; i < num_entries; ++i)
     {
+        // for debug
+        // assert(parentIdx < num_entries);
+        // std::cout << "BranchFactorInternal =" << BranchFactorInternal << std::endl;
+        // std::cout << num_entries << std::endl;
+        // std::cout << "parentIdx = " << parentIdx << std::endl;
+
         if(i == pos_1)
         {
+            // for debug
+            // std::cout << "parentIdx = " << parentIdx << std::endl;
+            // std::cout << "pos_1 = " << pos_1 << std::endl;
+            // std::cout << "parentIdx = " << parentIdx << std::endl << std::endl;
+
             newParentEntryList[parentIdx].pointer = reinterpret_cast<void*> (newNodeLeft);
             newParentEntryList[parentIdx].key = newSplitKey;
             newParentEntryList[parentIdx].version.first = btree->getVersion();
@@ -947,6 +971,11 @@ Node::balanceChilds(int pos_1, int pos_2)
         }
         else if(i == pos_2)
         {
+            // for debug
+            // std::cout << "parentIdx = " << parentIdx << std::endl;
+            // std::cout << "pos_2 = " << pos_2 << std::endl;
+            // std::cout << "parentIdx = " << parentIdx << std::endl << std::endl;
+
             newParentEntryList[parentIdx].pointer = reinterpret_cast<void*> (newNodeRight);
             newParentEntryList[parentIdx].key = entries[i].key;
             newParentEntryList[parentIdx].version.first = btree->getVersion();
@@ -956,12 +985,17 @@ Node::balanceChilds(int pos_1, int pos_2)
             count += sizeof(Entry);
             ++parentIdx;
         }
-        else if(entries[i].version.second == 0)
+        else if(entries[i].valid && entries[i].version.second == 0)
         {
+            // for debug
+            // std::cout << "i = " << i << ", copy from originial entries" << std::endl;
+
             newParentEntryList[parentIdx] = entries[i];
             assert(entries[i].valid);
             count += sizeof(Entry);
             ++parentIdx;
+
+            // std::cout << "copy from originial entries done" << std::endl;
         }
         else
         {
@@ -1010,6 +1044,9 @@ Node::balanceChilds(int pos_1, int pos_2)
         clflush(&(newParentEntryList[BranchFactorInternal - 1]));
     }
 
+    // for debug
+    // std::cout << "parent array update done" << std::endl;
+
     mfence();
 
     Entry* oldEntry = entries;
@@ -1021,8 +1058,13 @@ Node::balanceChilds(int pos_1, int pos_2)
     clflush(&num_entries);
     mfence();
     delete[] oldEntry;
-    delete[] tempArr;
     // no need to set num_entries for current node
+
+    // std::cout << "balance done" << std::endl;
+    // for(int i = 0; i < num_entries; ++i)
+    // {
+    //     std::cout << "i:" << i << " valid " << entries[i].valid << " pointer:" << entries[i].pointer << " end version: " << entries[i].version.second << std::endl;
+    // }
 }
 
 void
@@ -1395,7 +1437,7 @@ LeafNode::scan(int lower, int upper)
             if(ptr->entries[i].key >= lower && ptr->entries[i].key < upper && ptr->entries[i].version.second == 0)
             {
                 Record* r = reinterpret_cast<Record*> (ptr->entries[i].pointer);
-                printRecordList(r);
+                // printRecordList(r);
             }
             else if(ptr->entries[i].key >= upper && ptr->entries[i].version.second == 0)
                 return;
@@ -1413,7 +1455,7 @@ LeafNode::scan(int key)
         if(entries[i].key == key && entries[i].version.second == 0)
         {
             Record* r = reinterpret_cast<Record*> (entries[i].pointer);
-            printRecordList(r);
+            // printRecordList(r);
             return;
         }
     }
