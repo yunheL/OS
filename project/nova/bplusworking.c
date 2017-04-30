@@ -497,7 +497,7 @@ make_consistent_delete_hard(node* n){
     int i;
     bool found_key;
     int *arr = n->keys;
-    if(n->log->split = 0 || n->log->consistent == 1 || n->log->consistent == 0){
+    if(n->log->split == 0 || n->log->consistent == 1 || n->log->consistent == 0){
         n->log->consistent = 0;
         mem_flush(n->log);
         n->log->key = -1;
@@ -521,7 +521,7 @@ make_consistent_delete_hard(node* n){
         delete_from_node_hard(n,n->log->key);
     }
     
-
+    return n;
 }
 
 /*
