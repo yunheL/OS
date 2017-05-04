@@ -12,7 +12,17 @@
 #define SLOTWIDTH 4
 #endif
 
-#define BILLIION 1000000000L
+/* EVAL */
+#define BILLION 1000000000L
+#define NUMINSERT 100000
+#define NUMDELETE NUMINSERT/2
+#define EVALLOOP 2
+
+typedef struct timeTuple{
+  uint64_t insertTime; 
+  uint64_t deleteTime;
+} timeTuple;
+
 #define MAXSLOT (MAXKEY+1)
 static_assert(MAXKEY <= (1 << SLOTWIDTH), "width not enough");
 static_assert(SLOTWIDTH * MAXSLOT <= 64, "not fit into 64 bits");

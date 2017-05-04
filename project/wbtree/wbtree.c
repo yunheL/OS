@@ -351,6 +351,47 @@ void print_lookup(Tree* tree, KeyType key) {
   }
 }
 
+/* EVAL */
+
+//test1: insert/delete, option1 = sequential, option2 = random
+timeTuple test1(Tree* tree, int option) {
+  uint64_t diffInsert, diffDelete;
+  struct timespec startInsert,endInsert, startDelete, endDelete;
+  struct timeTuple ret;
+
+  srand(42);
+  //time insert
+  clock_gettime(CLOCK_MONOTONIC, &startInsert);
+  for (int i = 0; i < NUMINSERT; i++) {
+    if(option == 1) insert_ng(tree, i, i*3);
+    else if(option == 2){
+      insert_ng(tree, rand()%10000, i*3);
+    }
+  }
+  clock_gettime(CLOCK_MONOTONIC, &endInsert);
+  diffInsert = BILLION * (endInsert.tv_sec - startInsert.tv_sec) + endInsert.tv_nsec - startInsert.tv_nsec;
+  diffInsert = (diffInsert*1.0)/EVALLOOP;
+  //printf("insert time = %llu ns\n", (long long unsigned int) diffInsert);
+
+  //time delete
+  clock_gettime(CLOCK_MONOTONIC, &startDelete);
+  for (int i = 0; i < NUMDELETE; i++) {
+    delete(tree, i);
+  }
+  clock_gettime(CLOCK_MONOTONIC, &endDelete);
+  diffDelete = BILLION * (endDelete.tv_sec - startDelete.tv_sec) + endDelete.tv_nsec - startDelete.tv_nsec;
+  diffDelete = (diffDelete*1.0)/EVALLOOP;
+  //printf("delete time = %llu ns\n", (long long unsigned int) diffDelete);
+
+  ret.insertTime = diffInsert;
+  ret.deleteTime = diffDelete;
+
+  return ret;
+  //print_tree(tree->root, tree->height);
+}
+
+/* original test
+//manual test
 void test1(Tree* tree) {
   insert_ng(tree, 13, 42);
   insert_ng(tree, 1, 42);
@@ -369,6 +410,8 @@ void test1(Tree* tree) {
 
   print_tree(tree->root, tree->height);
 }
+
+//rand test
 void test2(Tree* tree) {
   srand(42);
   for (int i = 0; i < 10000; i++) {
@@ -384,23 +427,29 @@ void test2(Tree* tree) {
   print_lookup(tree, 9448);
   print_lookup(tree, 4504);
 }
+
+//sequential++
 void test3(Tree* tree) {
   for (int i = 0; i < 10000; i++) {
     insert_ng(tree, i, i*3);
   }
-//  print_tree(tree->root, tree->height);
+  print_tree(tree->root, tree->height);
   print_lookup(tree, 21);
   print_lookup(tree, 0);
   print_lookup(tree, 35);
   print_lookup(tree, 36);
   print_lookup(tree, 39);
 }
+
+//sequential--
 void test4(Tree* tree) {
   for (int i = 3*7+7-1 +1; i >= 0; i--) {
     insert_ng(tree, i, 42);
   }
   print_tree(tree->root, tree->height);
 }
+
+//insert duplicate
 void test5(Tree* tree) {
   for (int i = 0; i < 35; i++) {
     insert_ng(tree, 4, i);
@@ -416,16 +465,37 @@ void test5(Tree* tree) {
   print_lookup(tree, 3);
   print_lookup(tree, 5);
 }
+*/
 
 int 
 main(int argc, char* argv[])
 {
   Tree* t = init_empty_tree();
+  struct timeTuple result;
+  uint64_t insertTime = 0;
+  uint64_t deleteTime = 0;
+  printf("arg=%d\n",atoi(argv[1]));
 
   switch (*argv[1]) {
   case '1':
-    test1(t);
+  case '2':
+    insertTime = 0;
+    deleteTime = 0;
+
+    int i = 0;
+    for(i = 0; i < EVALLOOP; i++){
+      Tree* tn = init_empty_tree();
+      result = test1(tn,2);
+      insertTime = insertTime + result.insertTime;
+      deleteTime += result.deleteTime;
+      printf("here: sum = %llu, lap = %llu\n", (long long unsigned int) insertTime, (long long unsigned int) result.insertTime);
+    }
+    insertTime = (insertTime * 1.0)/EVALLOOP;
+    deleteTime = (deleteTime * 1.0)/EVALLOOP;
+    printf("insert time = %llu ns\n", (long long unsigned int) insertTime);
+    printf("delete time = %llu ns\n", (long long unsigned int) deleteTime);
     break;
+/*
   case '2':
     test2(t);
     break;
@@ -438,6 +508,7 @@ main(int argc, char* argv[])
   case '5':
     test5(t);
     break;
+*/
   default:
     ;
   }
