@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <time.h>
+#include <assert.h>
 
 #ifdef TRAD
 #define MAXKEY 7
@@ -10,6 +12,7 @@
 #define SLOTWIDTH 4
 #endif
 
+#define BILLIION 1000000000L
 #define MAXSLOT (MAXKEY+1)
 static_assert(MAXKEY <= (1 << SLOTWIDTH), "width not enough");
 static_assert(SLOTWIDTH * MAXSLOT <= 64, "not fit into 64 bits");

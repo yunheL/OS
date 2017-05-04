@@ -1,7 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <assert.h>
 #include "wbtree.h"
 
 int addr2sym(void* p) {
