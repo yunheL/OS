@@ -99,7 +99,7 @@ Tree* init_empty_tree() {
 void insert_ng(Tree* tree, KeyType newkey, RecordType newval) {
   static NonLeaf* stack[MAXSTACK];  // on bss
   static uint8_t stack_pos_slot[MAXSTACK];  // on bss
-  static uint8_t stack_pos_key[MAXSTACK];  // on bss
+//  static uint8_t stack_pos_key[MAXSTACK];  // on bss
   int top = 0;                      // not static, 0 every time
   uint64_t* atom_addr[MAXATOM];
   uint64_t atom_newv[MAXATOM];
@@ -116,7 +116,7 @@ void insert_ng(Tree* tree, KeyType newkey, RecordType newval) {
       pos_key = MAXKEY;                 // [LB, ...]
     }
     stack_pos_slot[top-1] = pos_slot;
-    stack_pos_key[top-1] = pos_key;
+//    stack_pos_key[top-1] = pos_key;
     node = node->pointer_array[pos_key];
   }
   Leaf* leaf = (Leaf*)node;
@@ -169,7 +169,7 @@ void insert_ng(Tree* tree, KeyType newkey, RecordType newval) {
     node = stack[top];
     uint8_t n = SIZE(node);
     uint8_t pos_slot = stack_pos_slot[top];
-    uint8_t pos_key = stack_pos_key[top];
+//    uint8_t pos_key = stack_pos_key[top];
     assert(n < MAXKEY);
     {  // insert key from children split
       uint8_t empty = locate_empty(node->slot_array, n);
@@ -375,11 +375,11 @@ void test1(Tree* tree) {
 }
 void test2(Tree* tree) {
   srand(42);
-  for (int i = 0; i < 3*8+4+14 +1+1000000; i++) {
+  for (int i = 0; i < 10000; i++) {
     int x = rand()%10000;
     insert_ng(tree, x, x % 7);
   }
-  //print_tree(tree->root, tree->height);
+//  print_tree(tree->root, tree->height);
   print_lookup(tree, 1169);
   print_lookup(tree, 3867);
   print_lookup(tree, 9579);
@@ -389,7 +389,7 @@ void test2(Tree* tree) {
   print_lookup(tree, 4504);
 }
 void test3(Tree* tree) {
-  for (int i = 0; i < 1000000; i++) {
+  for (int i = 0; i < 10000; i++) {
     insert_ng(tree, i, i*3);
   }
 //  print_tree(tree->root, tree->height);
