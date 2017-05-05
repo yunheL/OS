@@ -14,9 +14,12 @@
 
 /* EVAL */
 #define BILLION 1000000000L
-#define NUMINSERT 100000
+#define NUMINSERT 6
 #define NUMDELETE NUMINSERT/2
-#define EVALLOOP 2
+#define EVALLOOP 100
+int mc_counter = 0;
+int m_counter = 0;
+int c_counter = 0;
 
 typedef struct timeTuple{
   uint64_t insertTime; 
@@ -48,12 +51,15 @@ mem_flush(volatile void *p)
 {
   asm volatile ("clflush (%0)" :: "r"(p));
   asm volatile ("mfence");
+  mc_counter++;
 }
 void clflush(volatile void* p) {
   asm volatile ("clflush (%0)" :: "r"(p));
+  c_counter++;
 }
 void mfence() {
   asm volatile ("mfence");
+  m_counter++;
 }
 
 typedef uint64_t KeyType;

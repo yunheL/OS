@@ -370,9 +370,9 @@ timeTuple test1(Tree* tree, int option) {
   }
   clock_gettime(CLOCK_MONOTONIC, &endInsert);
   diffInsert = BILLION * (endInsert.tv_sec - startInsert.tv_sec) + endInsert.tv_nsec - startInsert.tv_nsec;
-  diffInsert = (diffInsert*1.0)/EVALLOOP;
   //printf("insert time = %llu ns\n", (long long unsigned int) diffInsert);
 
+  //print_tree(tree->root, tree->height);
   //time delete
   clock_gettime(CLOCK_MONOTONIC, &startDelete);
   for (int i = 0; i < NUMDELETE; i++) {
@@ -380,7 +380,6 @@ timeTuple test1(Tree* tree, int option) {
   }
   clock_gettime(CLOCK_MONOTONIC, &endDelete);
   diffDelete = BILLION * (endDelete.tv_sec - startDelete.tv_sec) + endDelete.tv_nsec - startDelete.tv_nsec;
-  diffDelete = (diffDelete*1.0)/EVALLOOP;
   //printf("delete time = %llu ns\n", (long long unsigned int) diffDelete);
 
   ret.insertTime = diffInsert;
@@ -390,7 +389,89 @@ timeTuple test1(Tree* tree, int option) {
   //print_tree(tree->root, tree->height);
 }
 
-/* original test
+/*
+//test2: single split/delete
+timeTuple test2(Tree* tree) {
+  uint64_t diffInsert, diffDelete;
+  struct timespec startInsert,endInsert, startDelete, endDelete;
+  struct timeTuple ret;
+
+  //time single split
+  for (int i = 0; i < MAXKEY-1; i++) {
+    insert_ng(tree, i, i*3);
+  }
+  clock_gettime(CLOCK_MONOTONIC, &startInsert);
+  insert_ng(tree, MAXKEY, MAXKEY*3);
+  clock_gettime(CLOCK_MONOTONIC, &endInsert);
+  diffInsert = BILLION * (endInsert.tv_sec - startInsert.tv_sec) + endInsert.tv_nsec - startInsert.tv_nsec;
+  printf("insert time = %llu ns\n", (long long unsigned int) diffInsert);
+  print_tree(tree->root, tree->height);
+
+  for (int i = 0; i < MAXKEY-1; i++) {
+    insert_ng(tree, i, i*3);
+  }
+  //time delete
+  clock_gettime(CLOCK_MONOTONIC, &startDelete);
+  delete(tree, MAXKEY);
+  clock_gettime(CLOCK_MONOTONIC, &endDelete);
+  diffDelete = BILLION * (endDelete.tv_sec - startDelete.tv_sec) + endDelete.tv_nsec - startDelete.tv_nsec;
+  printf("delete time = %llu ns\n", (long long unsigned int) diffDelete);
+
+  print_tree(tree->root, tree->height);
+
+  ret.insertTime = diffInsert;
+  ret.deleteTime = diffDelete;
+
+  return ret;
+  //print_tree(tree->root, tree->height);
+}
+*/
+//test 3 single split
+uint64_t test3(Tree* tree) {
+  uint64_t diffInsert;
+  struct timespec startInsert,endInsert;
+ 
+  //time single split
+  for (int i = 0; i < MAXKEY/2; i++) {
+    insert_ng(tree, i, i*3);
+  }
+//  print_tree(tree->root, tree->height);
+  clock_gettime(CLOCK_MONOTONIC, &startInsert);
+  insert_ng(tree, MAXKEY, MAXKEY*3);
+  clock_gettime(CLOCK_MONOTONIC, &endInsert);
+  diffInsert = BILLION * (endInsert.tv_sec - startInsert.tv_sec) + endInsert.tv_nsec - startInsert.tv_nsec;
+//  printf("insert time = %llu ns\n", (long long unsigned int) diffInsert);
+//  print_tree(tree->root, tree->height);
+
+  return diffInsert;
+}
+
+uint64_t test4(Tree* tree) {
+  uint64_t diffDelete;
+  struct timespec startDelete, endDelete;
+
+  for (int i = 0; i < MAXKEY/2+MAXKEY; i++) {
+    insert_ng(tree, i, i*3);
+  }
+//  print_tree(tree->root, tree->height);
+  //time delete
+  clock_gettime(CLOCK_MONOTONIC, &startDelete);
+//  mc_counter = 0;
+//  c_counter = 0;
+//  m_counter = 0;
+  delete(tree, MAXKEY/2);
+//  printf("mc = %d, c = %d, m = %d\n", mc_counter, c_counter, m_counter);
+  clock_gettime(CLOCK_MONOTONIC, &endDelete);
+  diffDelete = BILLION * (endDelete.tv_sec - startDelete.tv_sec) + endDelete.tv_nsec - startDelete.tv_nsec;
+//  printf("delete time = %llu ns\n", (long long unsigned int) diffDelete);
+
+//  print_tree(tree->root, tree->height);
+
+  return diffDelete;
+}
+
+
+/* original tests
 //manual test
 void test1(Tree* tree) {
   insert_ng(tree, 13, 42);
@@ -470,11 +551,13 @@ void test5(Tree* tree) {
 int 
 main(int argc, char* argv[])
 {
-  Tree* t = init_empty_tree();
+//  Tree* t = init_empty_tree();
   struct timeTuple result;
   uint64_t insertTime = 0;
   uint64_t deleteTime = 0;
-  printf("arg=%d\n",atoi(argv[1]));
+  uint64_t sum = 0;
+  //printf("arg=%d\n",atoi(argv[1]));
+  int i = 0;
 
   switch (*argv[1]) {
   case '1':
@@ -482,29 +565,51 @@ main(int argc, char* argv[])
     insertTime = 0;
     deleteTime = 0;
 
-    int i = 0;
+    i = 0;
     for(i = 0; i < EVALLOOP; i++){
       Tree* tn = init_empty_tree();
-      result = test1(tn,2);
+      result = test1(tn,atoi(argv[1]));
       insertTime = insertTime + result.insertTime;
       deleteTime += result.deleteTime;
-      printf("here: sum = %llu, lap = %llu\n", (long long unsigned int) insertTime, (long long unsigned int) result.insertTime);
+      //printf("here: sum = %llu, lap = %llu\n", (long long unsigned int) insertTime, (long long unsigned int) result.insertTime);
     }
     insertTime = (insertTime * 1.0)/EVALLOOP;
     deleteTime = (deleteTime * 1.0)/EVALLOOP;
     printf("insert time = %llu ns\n", (long long unsigned int) insertTime);
     printf("delete time = %llu ns\n", (long long unsigned int) deleteTime);
     break;
-/*
-  case '2':
-    test2(t);
-    break;
+
   case '3':
-    test3(t);
+    insertTime = 0;
+    sum = 0;
+
+    i = 0;
+    for(i = 0; i < EVALLOOP; i++)
+    {
+      Tree* tn = init_empty_tree();
+      insertTime = test3(tn);
+      sum = sum + insertTime;
+    }
+    insertTime = (sum*1.0)/EVALLOOP;
+    printf("split time = %llu ns\n", (long long unsigned int) insertTime);
     break;
+
   case '4':
-    test4(t);
+    deleteTime = 0;
+    sum = 0;
+
+    i = 0;
+    for(i = 0; i < EVALLOOP; i++)
+    {
+      Tree* tn = init_empty_tree();
+      deleteTime = test4(tn);
+      sum = sum + deleteTime;
+    }
+    deleteTime = (sum*1.0)/EVALLOOP;
+    printf("delete time = %llu ns\n", (long long unsigned int) deleteTime);
     break;
+
+/*
   case '5':
     test5(t);
     break;
