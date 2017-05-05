@@ -1441,12 +1441,14 @@ int main(int argc, char* argv[]){
 	/* x = rand_interval(0,10); */
 	//x++;
         //printf("INSERTING %d Random number generated: %d\n", 2*i, x);	
-        while(i < 7){
+        if(i < 7){
          root = insert(root,2*i, 9, x);     
         }
+	else {
         clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&start);
         root = insert(root,2*i, 9, x);
         clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&end);
+	}
 	//printf("\n");
 
 	//printf("STATE IMMEDIATELY AFTER CRASH\n");
