@@ -25,16 +25,6 @@ do
 	./a.out 1
         #echo $a
         a=`expr $a + 1`
-	
-done
-a=1
-gcc bplusNew_SingleDel.c
-while [ $a -lt 101 ]
-do
-	./a.out 1
-        #echo $a
-        a=`expr $a + 1`
-	
 done
 a=1
 gcc bplusNew_SingleSplit.c
