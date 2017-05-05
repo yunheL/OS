@@ -1490,7 +1490,6 @@ int main(int argc, char* argv[]){
    // clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&end);
     FILE *fp;
     fp = fopen("ExecutionTimesSeq8_10k.txt","a");
-    sum = sum/atoi(argv[1]);
     fprintf(fp,"%llu\n",(long long unsigned int)sum);
     fclose(fp);
 

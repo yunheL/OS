@@ -1443,8 +1443,9 @@ int main(int argc, char* argv[]){
 	/* x = rand_interval(0,10); */
 	//x++;
         //printf("INSERTING %d Random number generated: %d\n", 2*i, x);
+    root = insert(root,0,9,x);
         clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&start);	
-        root = insert(root,2*5, 9, x);   
+	 root = insert(root,2*5, 9, x);   
         clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&end);
         diff = BILLION * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
 	//printf("\n");

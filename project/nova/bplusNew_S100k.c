@@ -1464,7 +1464,6 @@ int main(int argc, char* argv[]){
     diff = BILLION * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
     FILE *fp;
     fp = fopen("ExecutionTimesSeq8_100k.txt","a");
-    sum = sum/atoi(argv[1]);
     fprintf(fp,"%llu\n",(long long unsigned int)sum);
     fclose(fp);
     //printf("Time (ns): %llu\n",(long long unsigned int)diff);

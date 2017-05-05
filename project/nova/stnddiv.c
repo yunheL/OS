@@ -5,7 +5,7 @@
 
 int main(int argc, char** argv) {
 	FILE *fp;
-	fp = fopen("ExecutionTimesSeq8_100k.txt","r");
+	fp = fopen("ExecutionTimes_SingleDel.txt","r");
 	float time[10];
 	float sum = 0.0;
 	float stnDiv = 0.0;
