@@ -685,7 +685,7 @@ LeafNode::scan(int lower, int upper)
             if(ptr->keys[i] >= lower && ptr->keys[i] < upper)
             {
                 Record* r = reinterpret_cast<Record*> (ptr->pointers[i]);
-                printRecordList(r);
+                // printRecordList(r);
             }
             else if(ptr->keys[i] >= upper)
                 return;
@@ -702,7 +702,7 @@ LeafNode::scan(int key)
         if(keys[i] == key)
         {
             Record* r = reinterpret_cast<Record*> (pointers[i]);
-            printRecordList(r);
+            // printRecordList(r);
             return;
         }
     }
