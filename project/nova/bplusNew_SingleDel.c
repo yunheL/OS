@@ -1439,15 +1439,17 @@ int main(int argc, char* argv[]){
     struct timespec start,end;
     //clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&start);
     uint64_t sum;
-    for(i=0; i< atoi(argv[1]); i++){
+    //for(i=0; i< atoi(argv[1]); i++){
 	/* x = rand_interval(0,10); */
 	//x++;
+         int d;
         //printf("INSERTING %d Random number generated: %d\n", 2*i, x);
+        root = insert(root,2*5, 9, x);   
+        root = insert(root,2*10, 9, x);
         clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&start);	
-        root = insert(root,2*i, 9, x);     
+        d = delete_key(root,20,x);
         clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&end);
         diff = BILLION * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
-	    sum += diff;
 	//printf("\n");
 
 	//printf("STATE IMMEDIATELY AFTER CRASH\n");
@@ -1458,17 +1460,15 @@ int main(int argc, char* argv[]){
 	//printf("\nSTATE AFTER JOURNAL PLAYBACK\n");	
 	//print_tree(root);
 	//printf("========================================\n");
-    }
+    //}
    // clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&end);
-    diff = BILLION * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
     FILE *fp;
-    fp = fopen("ExecutionTimesSeq8_10k.txt","a");
-    sum = sum/atoi(argv[1]);
-    fprintf(fp,"%llu\n",(long long unsigned int)sum);
+    fp = fopen("ExecutionTimes_SingleDel.txt","a");
+    fprintf(fp,"%llu\n",(long long unsigned int)diff);
     fclose(fp);
     //printf("Time (ns): %llu\n",(long long unsigned int)diff);
    //root = insert(root,3,9);
-    int d;
+    
     //root = insert(root,7,9,x);
     //print_tree(root);
     //printf("DELETE\n");

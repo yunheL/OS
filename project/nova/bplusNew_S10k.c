@@ -106,6 +106,7 @@ remove_child(node* n, int lkey){
     pos = n->num_keys;
     if(duplicate(arr,n->num_keys,&pos)){
         for(i=pos; i<n->num_keys-1;i++){
+
             *(arr+i) = *(arr+i+1);
             *(n->pointers+i+1) = *(n->pointers+i+2);
         }
@@ -127,6 +128,7 @@ remove_child(node* n, int lkey){
         }
         else{
            while(i < n->num_keys){
+                printf("check\n");
                 *(arr+i) = *(arr+i+1);
                 *(n->pointers+i+1) = *(n->pointers+i+2);
                 i++;
@@ -155,7 +157,7 @@ remove_child(node* n, int lkey){
         }
         else if(size == 0){
             //root is 0
-            delete_node(parent);
+            //delete_node(parent);
         }
         
     }
@@ -185,7 +187,7 @@ merge(node* left_node, node* right_node){
     //remove right node from parents pointers
     remove_child(parent,right_lkey);
     //delete the right node
-    delete_node(right_node);
+    //delete_node(right_node);
 }
 
 /*
@@ -203,6 +205,8 @@ get_left(node* n, int lkey){
     int *arr = parent->keys;
     int *child_arr = n->keys;
     void* value;
+    bool found = false;
+    left = 0;
     //get the position of the left neighbor
     for(i=0; i < parent->num_keys; i++){
             //children nodes are the values of *(parent->pointers)
@@ -214,11 +218,22 @@ get_left(node* n, int lkey){
             }else {
                 printf("Got the WRONG neighbor\n");
             }*/
+            found = true;
             break;
         }
     }
+    if(!found){
+        printf("ERROR!\n");
+        printf("left key: %d\n",lkey);
+        printf("left: %d\n",lkey);
+        printf("parent num keys: %d\n",parent->num_keys);
+        if(parent==NULL){
+            printf("DOUBLE ERROR\n");
+        }
+    }
     bool taken=false;
-    node* left_node = *(parent->pointers+left);
+    if(parent != NULL){
+        node* left_node = *(parent->pointers+left);
     //need to make sure you haven't already take a key from left
     if(n->log->num_keys ==(order-1)/2){
         taken = true;
@@ -277,6 +292,8 @@ get_left(node* n, int lkey){
         }
         n->log->num_keys = n->num_keys; 
         left_node->log->num_keys = left_node->num_keys;
+    }
+    
         
     }
     
@@ -372,6 +389,7 @@ delete_from_node_hard(node* leaf, int key){
         leaf->num_keys--;
     }
     else {
+
         pos = 0;
         for(i=0; i < leaf->num_keys; i++){
             // Found spot i should delete from
@@ -402,7 +420,7 @@ delete_from_node_hard(node* leaf, int key){
     if(leaf->num_keys == 0){
         if(leaf->parent == NULL){
 	    //  printf("DELETE TREE\n");
-            delete_node(leaf);
+            //delete_node(leaf);
         }
         else {
             remove_child(leaf->parent,key);
@@ -502,6 +520,7 @@ make_consistent_delete_hard(node* n){
     int i;
     bool found_key;
     int *arr = n->keys;
+
     if(n->log->split = 0 || n->log->consistent == 1 || n->log->consistent == 0){
         cflush(n->log);
         mfence();
@@ -519,6 +538,7 @@ make_consistent_delete_hard(node* n){
                 break;
             }
     }
+
     //key still there
     if(found_key){
         delete_from_node_hard(n,n->log->key);
@@ -527,6 +547,7 @@ make_consistent_delete_hard(node* n){
     else {
         delete_from_node_hard(n,n->log->key);
     }
+
     
 
 }
@@ -597,9 +618,10 @@ delete_key(node* root, int key, int crash){
 
     
 
-
+    
     //simple no borrowing/merging
     if(leaf->num_keys > (order-1)/2){
+
         write_journal(root,
         leaf,
         key,
@@ -608,6 +630,7 @@ delete_key(node* root, int key, int crash){
         0,
         crash,
         1); //delete
+
         make_consistent_delete_simple(leaf,1);
         cflush(leaf->log);
         mfence(); 
@@ -615,6 +638,7 @@ delete_key(node* root, int key, int crash){
         cflush(leaf->log);
     }
     else{
+
         write_journal(root,
         leaf,
         key,
@@ -623,6 +647,7 @@ delete_key(node* root, int key, int crash){
         1,
         crash,
         1); //delete
+
         make_consistent_delete_hard(leaf);
         if(leaf->log != NULL){
             cflush(leaf->log);
@@ -630,6 +655,7 @@ delete_key(node* root, int key, int crash){
             leaf->log->consistent = 0;
             cflush(leaf->log);
         }
+
         
     }
     
@@ -1438,7 +1464,9 @@ int main(int argc, char* argv[]){
     diff = 0;
     struct timespec start,end;
     //clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&start);
-    uint64_t sum;
+    uint64_t sum,sum2;
+    sum = 0;
+    sum2 = 0;
     for(i=0; i< atoi(argv[1]); i++){
 	/* x = rand_interval(0,10); */
 	//x++;
@@ -1459,16 +1487,30 @@ int main(int argc, char* argv[]){
 	//print_tree(root);
 	//printf("========================================\n");
     }
+    int d;
+    for(i=0; i< atoi(argv[1]); i++){
+        clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&start); 
+        printf("deleting: %d\n",i*2);
+        d = delete_key(root,i*2,x);     
+        clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&end);
+        diff = BILLION * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
+        sum2 += diff;
+    }
    // clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&end);
-    diff = BILLION * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
     FILE *fp;
     fp = fopen("ExecutionTimesSeq8_10k.txt","a");
     sum = sum/atoi(argv[1]);
     fprintf(fp,"%llu\n",(long long unsigned int)sum);
     fclose(fp);
+
+    FILE *fp2;
+    fp2 = fopen("ExecutionTimesSeq8_10k_Del.txt","a");
+    sum2 = sum2/atoi(argv[1]);
+    fprintf(fp2,"%llu\n",(long long unsigned int)sum2);
+    fclose(fp2);
     //printf("Time (ns): %llu\n",(long long unsigned int)diff);
    //root = insert(root,3,9);
-    int d;
+
     //root = insert(root,7,9,x);
     //print_tree(root);
     //printf("DELETE\n");

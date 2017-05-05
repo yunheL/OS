@@ -1439,6 +1439,7 @@ int main(int argc, char* argv[]){
     struct timespec start,end;
     //clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&start);
     uint64_t sum;
+    sum = 0;
     for(i=0; i< atoi(argv[1]); i++){
 	/* x = rand_interval(0,10); */
 	//x++;
@@ -1462,7 +1463,7 @@ int main(int argc, char* argv[]){
    // clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&end);
     diff = BILLION * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
     FILE *fp;
-    fp = fopen("ExecutionTimesSeq8_10k.txt","a");
+    fp = fopen("ExecutionTimesSeq8_100k.txt","a");
     sum = sum/atoi(argv[1]);
     fprintf(fp,"%llu\n",(long long unsigned int)sum);
     fclose(fp);
